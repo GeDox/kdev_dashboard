@@ -14,7 +14,7 @@
         html { font-size: 16px }
     </style>
 </head>
-<body>
+<body style="background-color: #f7f8fa">
     <nav class="navbar sticky-top navbar-expand-lg navbar-dark bg-dark">
         <div class="container-fluid">
             <a class="navbar-brand pr-5" href="#">
@@ -36,7 +36,7 @@
                                 <?php echo ( $navTabs[$i]['active'] ) ? 
                                 ( 'active" aria-current="page"' ) : 
                                 ( '"' ); ?>
-                                href="<?php echo site_url( $navTabs[$i]['id'] )?>">
+                                href="<?php echo home_url( $navTabs[$i]['id'] )?>">
                                 <?php echo $navTabs[$i]['name']?>
                             </a> 
                         </li>

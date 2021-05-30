@@ -5,17 +5,29 @@ class INV_Orders extends INV_Abstract_Taxonomy {
 
     public function initialize( $taxID ) {
         self::$taxID = $taxID;
-
-        
-
-        add_action( 'orders-invoices_edit_form_fields', array( 'INV_Orders', 'taxonomyShowAdminCustomFields' ), 10, 2 );  
-        add_action( 'orders-invoices_add_form_fields', array( 'INV_Orders', 'taxonomyShowAdminCustomFields' ), 10, 2 );  
-
     }
 
     public function taxonomyShowAdminCustomFields( $tag ) {
-        echo self::$taxID; ?>
-        XD
+        $term_meta = get_post_meta( $tag->term_id );
+        ?>
+        <tr class="form-field">  
+            <th scope="row" valign="top">  
+                <label for="class"><?php _e('Total'); ?></label>  
+            </th>  
+            <td>  
+                <input type="text" name="term_meta[total]" id="term_meta[total]" size="40" style="width:95%;" value="<?php echo $term_meta['total'][0] ?>"><br />  
+                <span class="description"><?php _e('Total value of order, without fees'); ?></span>  
+            </td>  
+        </tr>
+        <tr class="form-field">  
+            <th scope="row" valign="top">  
+                <label for="class"><?php _e('Fees'); ?></label>  
+            </th>  
+            <td>  
+                <input type="text" name="term_meta[fees]" id="term_meta[fees]" size="40" style="width:95%;" value="<?php echo $term_meta['fees'][0] ?>"><br />  
+                <span class="description"><?php _e('Fees from order'); ?></span>  
+            </td>  
+        </tr>  
         <?php
     }
 }

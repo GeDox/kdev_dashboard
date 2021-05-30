@@ -10,9 +10,10 @@ class INV_Main {
         INV_Orders_Status::init( 'status', 'Status', 'status' );
         INV_Coupons::init( 'coupons', 'Coupons', 'coupons' );
         INV_Restaurants::init( 'restaurants', 'Restaurants', 'restaurants' );
+        INV_Rest::init();
         INV_Templates::init();
 
-        $unusedTermsFields = array( 'status', 'invoices', 'coupons', 'restaurants' );
+        $unusedTermsFields = array( 'status', 'invoices', 'coupons', 'restaurants', 'orders' );
         foreach( $unusedTermsFields as $term ) {
             INV_Main::hideUnusedFormFields( $term );
         }
@@ -24,6 +25,6 @@ class INV_Main {
     }
 
     public function handleUnusedFormFields( ) {
-        ?> <style>.term-description-wrap,.term-parent-wrap{display:none;}</style> <?php
+        ?> <style>.term-description-wrap,.term-parent-wrap,.column-description,.inline{display:none;}</style> <?php
     }
 }

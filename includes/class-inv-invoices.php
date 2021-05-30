@@ -19,6 +19,7 @@ class INV_Invoices {
         );
 
         add_filter( 'invmng_invoices_category', array( 'INV_Invoices', 'invoiceCategory' ) );
+        add_action( 'save_post_' . INVMNG_PT_MAIN_NAME, array( 'INV_Invoices', 'overrideSave' ), 20, 2 );
     }
 
     public function invoiceCategory() {
@@ -30,5 +31,24 @@ class INV_Invoices {
 
         array_unshift( $terms, $invCat );
         return $terms;
+    }
+
+    public function overrideSave( $post_id, $post ) {   
+        $terms = get_the_terms( $post_id, INVMNG_PT_MAIN_NAME . '-orders' );
+        $total = 0; $fees = 0;
+
+        for( $i=0; $i < count( $terms ); $i++ ) {
+            $term = $terms[ $i ];
+            $meta = get_post_meta( $term->term_id );
+
+            $total += (float)$meta[ 'total' ][ 0 ];
+            $fees += (float)$meta[ 'fees' ][ 0 ];
+        }
+
+        $transfer = $total + $fees;
+
+        update_post_meta( $post_id, 'total', $total );
+        update_post_meta( $post_id, 'fees', $fees );
+        update_post_meta( $post_id, 'transfer', $transfer );
     }
 }

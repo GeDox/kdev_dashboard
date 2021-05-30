@@ -6,6 +6,7 @@ class INV_Templates {
     public function init() {
         add_filter( 'invmng_navbar', array( 'INV_Templates', 'makeNavigation' ) );
         add_filter( 'template_include', array( 'INV_Templates', 'overrideTemplate' ) );
+        add_action( 'wp_enqueue_scripts', array( 'INV_Templates', 'enqueueScripts' ) );
     }
 
     public function makeNavigation() {
@@ -34,6 +35,10 @@ class INV_Templates {
         
         $templateName = is_null( $wp_query->query['name'] ) ? get_queried_object()->name : $wp_query->query['name'];
 
+        if ( $templateName == 'invmng' ) 
+            $templateName = 'invoices';
+
+        //var_dump( get_queried_object() );
         if( isInSpecificType( $templateName, $archiveTypes ) ) {
             return INVMNG_PLUGIN_DIR_PATH . '/templates/archive-' . $templateName . '.php';
         } else {
@@ -45,6 +50,10 @@ class INV_Templates {
         }
         
         return $template;
+    }
+
+    public function enqueueScripts() {
+        wp_enqueue_script( 'kdev-dashboard-script', INVMNG_PLUGIN_DIR_URL . 'assets/kdev_dashboard.js', array(''), time(), true );
     }
 }
 

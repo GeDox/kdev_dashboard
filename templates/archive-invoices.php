@@ -26,7 +26,7 @@
     </div>
 </div>
 <div class="row">
-    <table class="table table-light table-borderless">
+    <table class="table table-light table-borderless" border="0">
         <thead class="">
             <tr>
                 <th scope="col"><input type="checkbox"></th>
@@ -48,13 +48,13 @@
             <tr id="exampleContent" class="d-none">
                 <td><input type="checkbox"></td>
                 <td>#{ID}</td>
-                <td>{RESTAURANT_NAME}</td>
-                <td>{STATUS}</td>
+                <td><img src="{RESTAURANT_THUMB}"/> {RESTAURANT_NAME}</td>
+                <td><span class="badge {STATUS_CLASS}">{STATUS_NAME}</span></td>
                 <td>{START_DATE}</td>
                 <td>{END_DATE}</td>
-                <td>{TOTAL}</td>
-                <td>{FEES}</td>
-                <td>{TRANSFER}</td>
+                <td>HK${TOTAL}</td>
+                <td>HK${FEES}</td>
+                <td>HK${TRANSFER}</td>
                 <td>{ORDERS}</td>
                 <td>img</td>
             </tr>
@@ -88,12 +88,24 @@
                 $('#tableContent').empty();
                 
                 for( var i=0; i < data.length; i++ ) {
+                    var singlePost = data[ i ];
+                    var restaurantsInfo = singlePost.restaurants;
+                    var statusInfo = singlePost.status;
+                    var metaFields = singlePost['meta-fields'];
+                    
                     $('#tableContent').append(
                         '<tr>' +
                         $('#exampleContent').
                             clone().
                             html().
-                            replace( '{ID}', data[ i ].id ) +
+                            replace( '{ID}', singlePost.id ).
+                            replace( '{RESTAURANT_NAME}', restaurantsInfo.name ?? '-' ).
+                            replace( '{STATUS_CLASS}', statusInfo.class ?? '' ).  
+                            replace( '{STATUS_NAME}', statusInfo.name ?? '-').
+                            replace( '{TOTAL}', metaFields.total ?? 0 ).
+                            replace( '{FEES}', metaFields.fees ?? 0 ).
+                            replace( '{TRANSFER}', metaFields.transfer ?? 0).
+                            replace( '{ORDERS}', singlePost.orders ?? 0 ) +
                         '</tr>'
                     );
                 }
@@ -107,5 +119,8 @@
         });
     }
 
+    function parseTaxonomyInfo( data ) {
+        console.log( 'parseTaxonomyInfo', data._links );
+    }
 })( jQuery );
 </script>
