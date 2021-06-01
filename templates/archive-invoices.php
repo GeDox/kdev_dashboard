@@ -2,14 +2,14 @@
 
 <h3>Invoices</h3>
 
-<div class="row">
-    <div class="col-12 col-md-4 col-lg-4">
-        <ul id="invoicesCategory" class="list-inline">
+<div class="row m-0 mt-3 justify-content-end">
+    <div class="col-12 col-md-4 p-0">
+        <ul id="invoicesCategory" class="list-inline m-0">
             <?php $invCat = apply_filters( 'invmng_invoices_category', '', '' );
             for( $i=0; $i < count( $invCat ); $i++ ): ?>
             <li class="list-inline-item">
                 <a href="#" data-value="<?php echo $invCat[$i]->term_id ?>">
-                    <span class="badge <?php echo ( $invCat[$i]->term_id == 0 ) ? ( 'bg-secondary' ) : ( 'text-dark' ) ?>">
+                    <span class="badge text-uppercase <?php echo ( $invCat[$i]->term_id == 0 ) ? ( 'bg-secondary' ) : ( 'text-dark' ) ?>">
                         <?php echo $invCat[$i]->name ?>
                     </span>                
                 </a> 
@@ -17,19 +17,20 @@
             <?php endfor; ?>
         </ul>
     </div>
-    <div class="col-12 col-md-4 col-lg-4">
-        From to
-    </div>
-    <div class="col-12 col-md-4">
-        Search
-        Mark as paid
+    <div class="col-12 col-md-8 p-0 text-end">
+        <div class="d-inline-flex flex-row-reverse">
+            <?php $lastCategory = array_key_last( $invCat ); ?>
+            <button class="btn btn-warning btn-sm text-white" id="markAsPaidButton" style="margin: 0 0 0 15px" data-value="<?php echo $invCat[ $lastCategory ]->term_id ?>">Mark as paid</button>
+            <input class="form-control form-control-sm w-auto mr-sm-2" style="margin: 0 0 0 15px" type="search" placeholder="Search" aria-label="Search">
+            From to
+        </div>
     </div>
 </div>
-<div class="row">
+<div class="row m-0 mt-3">
     <table class="table table-light table-borderless" border="0" rules="none">
         <thead class="text-uppercase">
             <tr>
-                <th scope="col"><input type="checkbox"></th>
+                <th scope="col"><input type="checkbox" id="reCheckBox"></th>
                 <th scope="col">ID</th>
                 <th scope="col">Restaurant</th>
                 <th scope="col">Status</th>
@@ -46,9 +47,9 @@
         </tbody>
         <tfoot>
             <tr id="exampleContent" class="d-none">
-                <td><input type="checkbox"></td>
+                <td><input type="checkbox" class="singleInvoice" data-id="{ID}"></td>
                 <td>#{ID}</td>
-                <td><img src="{RESTAURANT_THUMB}" style="width: 20px"/> {RESTAURANT_NAME}</td>
+                <td><img src="{RESTAURANT_THUMB}" style="width: 20px"/> <span class="fw-bold">{RESTAURANT_NAME}</span></td>
                 <td><span class="badge {STATUS_CLASS} text-uppercase">{STATUS_NAME}</span></td>
                 <td>{START_DATE}</td>
                 <td>{END_DATE}</td>
@@ -69,74 +70,17 @@
 <style>
 .table { border-collapse: collapse; transition: 1s }
 .table, .table tr  { border: 1pt solid #E6E6E8 }
+.table th, .table tfoot { font-size: 12px; font-weight: 600 }
 .table td, .table th { border: transparent }
 .table thead, .table tfoot { color: rgb(155,155,155) }
 .table #tableContent tr:hover { transform: scale(1.05); border: 1pt solid #E6E6E8; cursor: pointer }
 .table .bg-light { background-color: rgb(224,228,231) !important }
+
+input[type="search"] {
+    background-image:url("https://cdn2.iconfinder.com/data/icons/ios-7-icons/50/search-256.png") !important;
+    background-position: 10px center;
+    background-repeat: no-repeat;
+    background-size: 15px 15px;
+    text-indent: 25px;
+}
 </style>
-
-<script>
-(function($) {
-    $('#invoicesCategory a').on('click', function(e){
-        e.preventDefault();
-
-        $('#invoicesCategory .badge').removeClass('bg-secondary').addClass('text-dark');
-        $(this).find('.badge').addClass( 'bg-secondary' ).removeClass( 'text-dark' );
-
-        var statusValue = parseInt( $(this).attr('data-value' ) );
-        reloadTable( 1, statusValue ? { 'invmng-status': statusValue } : {} );
-    });
-
-    reloadTable( 1 );
-    function reloadTable( pageNum, customQuery={} ) {
-        var params = {
-            'per_page': 12,
-            'page': pageNum
-        };
-
-        $.extend( params, customQuery );
-        $.ajax({
-            type: 'GET',
-            url: '/wp-json/wp/v2/invmng/?' + $.param( params ),
-            data: { action: 'createHTML' },
-            success: function(data, textStatus, request){
-                $('#maxPages').html( request.getResponseHeader('X-WP-TotalPages') );
-                $('#currentPage').html( pageNum );
-
-                $('#tableContent').empty();
-                
-                for( var i=0; i < data.length; i++ ) {
-                    var singlePost = data[ i ];
-                    var restaurantsInfo = singlePost.restaurants;
-                    var statusInfo = singlePost.status;
-                    var metaFields = singlePost['meta-fields'];
-                    
-                    $('#tableContent').append(
-                        '<tr>' +
-                        $('#exampleContent').
-                            clone().
-                            html().
-                            replace( '{ID}', singlePost.id ).
-                            replace( '{RESTAURANT_THUMB}', restaurantsInfo.thumbnail ?? '#' ).
-                            replace( '{RESTAURANT_NAME}', restaurantsInfo.name ?? '-' ).
-                            replace( '{STATUS_CLASS}', statusInfo.class ?? '' ).  
-                            replace( '{STATUS_NAME}', statusInfo.name ?? '-').
-                            replace( '{TOTAL}', metaFields.total ?? 0 ).
-                            replace( '{FEES}', metaFields.fees ?? 0 ).
-                            replace( '{TRANSFER}', metaFields.transfer ?? 0).
-                            replace( '{ORDERS}', singlePost.orders ?? 0 ) +
-                        '</tr>'
-                    );
-                }
-            },
-            error: function (request, textStatus, errorThrown) {
-                console.log( 'error', errorThrown );
-            }
-        });
-    }
-
-    function parseTaxonomyInfo( data ) {
-        console.log( 'parseTaxonomyInfo', data._links );
-    }
-})( jQuery );
-</script>

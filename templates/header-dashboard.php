@@ -7,8 +7,6 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-+0n0xVW2eSR5OomGNYDnhzAbDsOXxcvSN1TPprVMTNDbiYZCxYbOOl7+AMvyTG2x" crossorigin="anonymous">
 
     <title><?php wp_title(); ?></title>
-    
-    <?php wp_enqueue_script("jquery"); ?>
     <?php wp_head(); ?>
     <style>
         html { font-size: 16px }
@@ -32,11 +30,11 @@
                     for( $i=0; $i < count( $navTabs ); $i++ ):
                     ?>
                         <li class="nav-item">
-                            <a class="nav-link 
+                            <a class="nav-link
                                 <?php echo ( $navTabs[$i]['active'] ) ? 
-                                ( 'active" aria-current="page"' ) : 
+                                ( ' active" aria-current="page"' ) : 
                                 ( '"' ); ?>
-                                href="<?php echo home_url( $navTabs[$i]['id'] )?>">
+                                href="<?php echo home_url( 'index.php/'.$navTabs[$i]['id'] )?>">
                                 <?php echo $navTabs[$i]['name']?>
                             </a> 
                         </li>
@@ -50,4 +48,4 @@
         </div>
     </nav>
     <div class="container">
-        <div class="col-12">
+        <div class="col-12 mt-4">

@@ -7,3 +7,7 @@ function isActiveSpecificArchiveOrPostType( $type ) {
 function isInSpecificType( $type, $arr ) {
     return ! is_null( $type ) && in_array( $type, $arr );
 }
+
+function getTemplateName() {
+    return is_null( $wp_query->query['name'] ) ? get_queried_object()->name : $wp_query->query['name'];
+}

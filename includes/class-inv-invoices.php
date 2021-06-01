@@ -15,6 +15,11 @@ class INV_Invoices {
                 'rewrite' => array( 'slug' => $taxonomySlug ),
                 'show_in_rest' => true,
                 'supports' => array( 'title' ),
+                'capabilities' => array(
+                    'edit_post' => 'read',
+                    'edit_posts' => 'read',
+                    'edit_others_posts' => 'read'
+                )
             )
         );
 

@@ -7,6 +7,7 @@ class INV_Templates {
         add_filter( 'invmng_navbar', array( 'INV_Templates', 'makeNavigation' ) );
         add_filter( 'template_include', array( 'INV_Templates', 'overrideTemplate' ) );
         add_action( 'wp_enqueue_scripts', array( 'INV_Templates', 'enqueueScripts' ) );
+        add_filter( 'style_loader_src', array( 'INV_Templates', 'styleLoaderSrc' ) );
     }
 
     public function makeNavigation() {
@@ -33,7 +34,7 @@ class INV_Templates {
         $archiveTypes = array( 'coupons', 'orders', 'invoices', 'restaurants', 'status' );
         $postTypes = array( 'orders-invoices' );
         
-        $templateName = is_null( $wp_query->query['name'] ) ? get_queried_object()->name : $wp_query->query['name'];
+        $templateName = getTemplateName();
 
         if ( $templateName == 'invmng' ) 
             $templateName = 'invoices';
@@ -53,7 +54,24 @@ class INV_Templates {
     }
 
     public function enqueueScripts() {
-        wp_enqueue_script( 'kdev-dashboard-script', INVMNG_PLUGIN_DIR_URL . 'assets/kdev_dashboard.js', array(''), time(), true );
+        wp_deregister_script( 'jquery' );
+        wp_register_script( 'jquery', "https://code.jquery.com/jquery-3.1.1.min.js", array(), '3.1.1' );
+
+        wp_enqueue_script( 'kdev-dashboard-script', INVMNG_PLUGIN_DIR_URL . 'assets/kdev_dashboard.js', array( 'jquery' ) );
+        wp_localize_script( 'kdev-dashboard-script', 'ajaxVars', [
+            'root'  => esc_url_raw( rest_url() ),
+            'nonce' => wp_create_nonce( 'wp_rest' ),
+        ] );
+    }
+
+    public function styleLoaderSrc($href) {
+        if( is_null( getTemplateName() ) ) return $href;
+
+        if( strpos($href, "/themes/") === false ) {
+            return $href;
+        }
+
+        return false;
     }
 }
 
