@@ -50,12 +50,12 @@ class INV_Rest {
                 $postID = $object[ 'invmng-restaurants' ][ 0 ];
 
                 $postData = get_term( $postID, 'invmng-restaurants' )->name;
-               // $metaData = get_post_meta( $postID, 'class' )[ 0 ];
+                $metaData = get_post_meta( $postID, 'thumbnail' )[ 0 ];
 
                 $returnData = array( 
                     'id' => $postID, 
                     'name' => $postData, 
-                    //'class' => $metaData 
+                    'thumbnail' => $metaData 
                 );
 
                 return $returnData;
@@ -66,10 +66,21 @@ class INV_Rest {
 
         register_rest_field( INVMNG_PT_MAIN_NAME, 'orders', array(
             'get_callback' => function ( $object ) use ( $field ) {
-                return '20';
+                $postData = $object[ 'invmng-orders' ];
+
+                return count( $postData );
             },
             'update_callback' => null,
             'schema' => null
         ) );
+
+        add_filter( 'rest_'. INVMNG_PT_MAIN_NAME .'_query', array( 'INV_Rest', 'timeslip_meta_request_params' ), 10, 2 );
+    }
+
+    public function timeslip_meta_request_params( $args, $request ) {
+        $args['meta_key']   = $request['meta_key'];
+        $args['meta_value'] = $request['meta_value'];
+
+        return $args;
     }
 }

@@ -8,7 +8,7 @@
             <?php $invCat = apply_filters( 'invmng_invoices_category', '', '' );
             for( $i=0; $i < count( $invCat ); $i++ ): ?>
             <li class="list-inline-item">
-                <a href="#">
+                <a href="#" data-value="<?php echo $invCat[$i]->term_id ?>">
                     <span class="badge <?php echo ( $invCat[$i]->term_id == 0 ) ? ( 'bg-secondary' ) : ( 'text-dark' ) ?>">
                         <?php echo $invCat[$i]->name ?>
                     </span>                
@@ -26,8 +26,8 @@
     </div>
 </div>
 <div class="row">
-    <table class="table table-light table-borderless" border="0">
-        <thead class="">
+    <table class="table table-light table-borderless" border="0" rules="none">
+        <thead class="text-uppercase">
             <tr>
                 <th scope="col"><input type="checkbox"></th>
                 <th scope="col">ID</th>
@@ -48,8 +48,8 @@
             <tr id="exampleContent" class="d-none">
                 <td><input type="checkbox"></td>
                 <td>#{ID}</td>
-                <td><img src="{RESTAURANT_THUMB}"/> {RESTAURANT_NAME}</td>
-                <td><span class="badge {STATUS_CLASS}">{STATUS_NAME}</span></td>
+                <td><img src="{RESTAURANT_THUMB}" style="width: 20px"/> {RESTAURANT_NAME}</td>
+                <td><span class="badge {STATUS_CLASS} text-uppercase">{STATUS_NAME}</span></td>
                 <td>{START_DATE}</td>
                 <td>{END_DATE}</td>
                 <td>HK${TOTAL}</td>
@@ -59,12 +59,21 @@
                 <td>img</td>
             </tr>
             <tr>
-                <td colspan="5">Page <span id="currentPage">-</span> of <span id="maxPages">-</span>
+                <td colspan="5" class="text-uppercase">Page <span id="currentPage">-</span> of <span id="maxPages">-</span>
                 <td colspan="6" class="text-right">Pagination</td>
             </tr>
         </tfoot>            
     </table>
 </div>
+
+<style>
+.table { border-collapse: collapse; transition: 1s }
+.table, .table tr  { border: 1pt solid #E6E6E8 }
+.table td, .table th { border: transparent }
+.table thead, .table tfoot { color: rgb(155,155,155) }
+.table #tableContent tr:hover { transform: scale(1.05); border: 1pt solid #E6E6E8; cursor: pointer }
+.table .bg-light { background-color: rgb(224,228,231) !important }
+</style>
 
 <script>
 (function($) {
@@ -73,13 +82,22 @@
 
         $('#invoicesCategory .badge').removeClass('bg-secondary').addClass('text-dark');
         $(this).find('.badge').addClass( 'bg-secondary' ).removeClass( 'text-dark' );
+
+        var statusValue = parseInt( $(this).attr('data-value' ) );
+        reloadTable( 1, statusValue ? { 'invmng-status': statusValue } : {} );
     });
 
     reloadTable( 1 );
-    function reloadTable( pageNum ) {
+    function reloadTable( pageNum, customQuery={} ) {
+        var params = {
+            'per_page': 12,
+            'page': pageNum
+        };
+
+        $.extend( params, customQuery );
         $.ajax({
             type: 'GET',
-            url: '/wp-json/wp/v2/invmng/?per_page=12&page='+pageNum,
+            url: '/wp-json/wp/v2/invmng/?' + $.param( params ),
             data: { action: 'createHTML' },
             success: function(data, textStatus, request){
                 $('#maxPages').html( request.getResponseHeader('X-WP-TotalPages') );
@@ -99,6 +117,7 @@
                             clone().
                             html().
                             replace( '{ID}', singlePost.id ).
+                            replace( '{RESTAURANT_THUMB}', restaurantsInfo.thumbnail ?? '#' ).
                             replace( '{RESTAURANT_NAME}', restaurantsInfo.name ?? '-' ).
                             replace( '{STATUS_CLASS}', statusInfo.class ?? '' ).  
                             replace( '{STATUS_NAME}', statusInfo.name ?? '-').
@@ -109,12 +128,9 @@
                         '</tr>'
                     );
                 }
-                //Figure out the logic whether the next fetch should happen :) 
-                // and disable the button if so.
             },
             error: function (request, textStatus, errorThrown) {
                 console.log( 'error', errorThrown );
-            //FailSafe for WP API Failing
             }
         });
     }
